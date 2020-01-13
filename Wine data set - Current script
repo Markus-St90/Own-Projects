@@ -1,0 +1,48 @@
+# Context and goal 
+Use machine learning to determine which physiochemical properties make a wine 'good'!
+
+# Load libraries
+library(scales)
+library(stats)
+library(miscTools)
+library(rpart.plot)
+library(caret)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(rpart)
+library(stats)
+library(randomForest)
+source('helper.R')
+
+# Load and view data frame 
+wine <- read.csv('winequality-red.csv', sep = ',', header = TRUE)
+wine$quality <- as.factor(wine$quality)
+head(wine)
+tail(wine)
+str(wine)
+
+# Creating a training and test data set
+set.seed(45)
+train.index <- createDataPartition(wine$quality, list = FALSE, p = 0.75)
+train <- wine[train.index,]
+test <- wine[-train.index,]
+
+# Creating a decision tree based on all variables to determine which property makes wine good
+model <- rpart(quality ~ ., 
+               data = train, 
+               parms = list(split = "information"), 
+               method = "class",
+               control = rpart.control(minsplit = 5, xval = 1, cp = 0.01))
+               
+print(prp(model, digits = 4))
+
+# Model randomforest
+model1 <- randomForest(quality ~ ., data = train, ntree = , nodesize = 1)
+print(model1)
+
+# Prediction and Accuracy of created model 
+pred_model1 <- predict(model1, test)
+print(confusionMatrix(pred_model1, test$quality)$overall['Accuracy'])
+
+
